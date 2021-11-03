@@ -28,7 +28,8 @@ export default class {
 		$('#modaleFile').modal('show')
 	}
 
-	// not need to cover this function by tests
+	// not need to cover this function byy tests
+	/* istanbul ignore next */
 	getBills = () => {
 		const userEmail = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).email : ''
 		if (this.firestore) {

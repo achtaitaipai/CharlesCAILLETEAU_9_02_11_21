@@ -1,11 +1,12 @@
-import { screen } from '@testing-library/dom'
+import { fireEvent, screen, toHaveStyle } from '@testing-library/dom'
 import '@testing-library/jest-dom'
 import BillsUI from '../views/BillsUI.js'
 import { bills } from '../fixtures/bills.js'
 import Router from '../app/Router.js'
-import { ROUTES_PATH } from '../constants/routes.js'
 import Firestore from '../app/Firestore'
 import { localStorageMock } from '../__mocks__/localStorage'
+import Bills from '../containers/Bills'
+import { ROUTES, ROUTES_PATH } from '../constants/routes.js'
 
 describe('Given I am connected as an employee', () => {
 	describe('When I am on Bills Page', () => {
@@ -22,7 +23,8 @@ describe('Given I am connected as an employee', () => {
 			const button = screen.getByTestId('icon-window')
 			expect(button).toHaveClass('active-icon')
 		})
-
+	})
+	describe('When I am on Bills Page', () => {
 		test('Then bills should be ordered from earliest to latest', () => {
 			const html = BillsUI({ data: bills })
 			document.body.innerHTML = html
@@ -37,6 +39,34 @@ describe('Given I am connected as an employee', () => {
 			const html = BillsUI({ error: 'some error message' })
 			document.body.innerHTML = html
 			expect(screen.getAllByText('Erreur')).toBeTruthy()
+		})
+	})
+	describe('When I am on Bills Page and I click on eye', () => {
+		test('then the modal should be show', () => {
+			const html = BillsUI({ data: bills })
+			document.body.innerHTML = html
+			const onNavigate = pathname => {
+				document.body.innerHTML = ROUTES({ pathname })
+			}
+			const bills = new Bills({ document, onNavigate, firestore: null, localStorage: window.localStorage })
+			$.fn.modal = jest.fn()
+			const eyeButton = screen.getAllByTestId('icon-eye')[0]
+			fireEvent.click(eyeButton)
+			const modal = screen.getByTestId('modal')
+			expect(modal).toHaveStyle('display: block')
+		})
+	})
+	describe('When I am on Bills Page and I click on new bill', () => {
+		test('the content of the page should be updtated', () => {
+			const html = BillsUI({ data: [] })
+			document.body.innerHTML = html
+			const onNavigate = pathname => {
+				document.body.innerHTML = ROUTES({ pathname })
+			}
+			const bills = new Bills({ document, onNavigate })
+			const newBillBtn = screen.getByTestId('btn-new-bill')
+			fireEvent.click(newBillBtn)
+			expect(screen.getAllByText('Type de dépense')).toBeTruthy()
 		})
 	})
 })
